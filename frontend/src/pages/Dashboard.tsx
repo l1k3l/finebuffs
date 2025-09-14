@@ -168,83 +168,16 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Actions */}
+      {/* Future Features Placeholder */}
       <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Quick Actions
+        <div className="px-4 py-5 sm:p-6 text-center">
+          <div className="text-6xl mb-4">📊</div>
+          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2">
+            More Features Coming Soon
           </h3>
-          <div className="mt-5">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <Link
-                to="/products/add"
-                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <div>
-                  <span className="rounded-lg inline-flex p-3 bg-indigo-50 text-indigo-600">
-                    ➕
-                  </span>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-900">Add Product</h4>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Add a new product to your inventory
-                  </p>
-                </div>
-              </Link>
-
-              <Link
-                to="/scan"
-                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <div>
-                  <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-600">
-                    📱
-                  </span>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-900">QR Scanner</h4>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Scan QR codes to update stock
-                  </p>
-                </div>
-              </Link>
-
-              <Link
-                to="/products"
-                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <div>
-                  <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-600">
-                    📦
-                  </span>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-900">View Products</h4>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Browse all your products
-                  </p>
-                </div>
-              </Link>
-
-              <Link
-                to="/transactions"
-                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <div>
-                  <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-600">
-                    📋
-                  </span>
-                </div>
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-900">Transaction History</h4>
-                  <p className="mt-1 text-sm text-gray-500">
-                    View stock movement history
-                  </p>
-                </div>
-              </Link>
-            </div>
-          </div>
+          <p className="text-sm text-gray-500">
+            This space is reserved for future dashboard enhancements like analytics, reports, and more!
+          </p>
         </div>
       </div>
     </div>

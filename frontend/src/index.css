@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom brand colors */
+.bg-brand-600 {
+  background-color: rgb(37, 150, 190);
+}
+
+.bg-brand-700 {
+  background-color: rgb(31, 127, 161);
+}
+
+.text-brand-600 {
+  color: rgb(37, 150, 190);
+}
+
+.text-brand-500 {
+  color: rgb(44, 169, 214);
+}
+
+.text-brand-700 {
+  color: rgb(31, 127, 161);
+}
+
+.border-brand-500 {
+  border-color: rgb(44, 169, 214);
+}
+
+.ring-brand-500 {
+  --tw-ring-color: rgb(44, 169, 214);
+}
+
+.hover\:bg-brand-700:hover {
+  background-color: rgb(31, 127, 161);
+}
+
+.hover\:text-brand-500:hover {
+  color: rgb(44, 169, 214);
+}
+
+.hover\:text-brand-700:hover {
+  color: rgb(31, 127, 161);
+}
+
+.hover\:border-brand-300:hover {
+  border-color: rgb(131, 205, 238);
+}
+
+.focus\:ring-brand-500:focus {
+  --tw-ring-color: rgb(44, 169, 214);
+}
+
+.focus\:border-brand-500:focus {
+  border-color: rgb(44, 169, 214);
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

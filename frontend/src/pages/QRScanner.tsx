@@ -150,7 +150,7 @@ const QRScanner: React.FC = () => {
                 </button>
                 <button
                   onClick={restartScanner}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-indigo-700"
                 >
                   Restart Scanner
                 </button>
@@ -165,7 +165,7 @@ const QRScanner: React.FC = () => {
               </p>
               <button
                 onClick={startScanner}
-                className="px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                className="px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-brand-600 hover:bg-indigo-700"
               >
                 Start Scanner
               </button>
@@ -255,7 +255,7 @@ const QRScanner: React.FC = () => {
             </div>
             <button
               onClick={() => navigate('/products')}
-              className="text-indigo-600 hover:text-indigo-500 text-sm font-medium"
+              className="text-brand-600 hover:text-indigo-500 text-sm font-medium"
             >
               View Products →
             </button>

@@ -54,7 +54,7 @@ const ProductList: React.FC = () => {
         <div className="mt-4 sm:mt-0">
           <Link
             to="/products/add"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
           >
             ➕ Add Product
           </Link>
@@ -72,7 +72,7 @@ const ProductList: React.FC = () => {
         <input
           type="text"
           placeholder="Search products..."
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -101,10 +101,10 @@ const ProductList: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (
             <div key={product.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-medium text-gray-900 truncate">
@@ -145,19 +145,16 @@ const ProductList: React.FC = () => {
                   <div className="mt-4 flex space-x-3">
                     <Link
                       to={`/product/${product.id}`}
-                      className="flex-1 text-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="flex-1 text-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                     >
                       View Details
                     </Link>
-                    <button
-                      onClick={() => {
-                        // Quick stock update could go here
-                        window.location.href = `/product/${product.id}`;
-                      }}
-                      className="flex-1 text-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    <Link
+                      to={`/product/${product.id}#stock-update`}
+                      className="flex-1 text-center px-3 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                     >
-                      Update Stock
-                    </button>
+                      📝 Quick Update
+                    </Link>
                   </div>
                 </div>
               </div>
