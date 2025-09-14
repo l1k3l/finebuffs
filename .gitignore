@@ -225,3 +225,6 @@ SETUP.md
 supabase/.temp/
 supabase/.vscode/
 supabase/supabase/.temp/
+
+# Github
+.github/copilot-instructions.md
