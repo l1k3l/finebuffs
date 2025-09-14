@@ -1,0 +1,254 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { createApiClient } from '../lib/api';
+import { Product, Transaction } from '../types';
+
+const Dashboard: React.FC = () => {
+  const { getAccessToken } = useAuth();
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    lowStockCount: 0,
+    totalValue: 0,
+  });
+  const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const api = createApiClient(getAccessToken);
+
+        // Fetch all data in parallel
+        const [productsResponse, lowStockResponse, transactionsResponse] = await Promise.all([
+          api.getProducts(),
+          api.getLowStockProducts(),
+          api.getTransactions(10),
+        ]);
+
+        // Calculate stats
+        const totalProducts = productsResponse.products.length;
+        const lowStockCount = lowStockResponse.low_stock_products.length;
+
+        setStats({
+          totalProducts,
+          lowStockCount,
+          totalValue: 0, // You could calculate this based on product values
+        });
+
+        setLowStockProducts(lowStockResponse.low_stock_products);
+        setRecentTransactions(transactionsResponse.transactions.slice(0, 5));
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [getAccessToken]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-gray-600">Loading dashboard...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-2 text-sm text-gray-700">
+          Welcome to your warehouse management system
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="text-2xl">📦</div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Total Products
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {stats.totalProducts}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="text-2xl">⚠️</div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Low Stock Items
+                  </dt>
+                  <dd className={`text-lg font-medium ${stats.lowStockCount > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                    {stats.lowStockCount}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="text-2xl">📊</div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    Recent Transactions
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">
+                    {recentTransactions.length}
+                  </dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Low Stock Alert */}
+      {lowStockProducts.length > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <div className="text-xl">⚠️</div>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Low Stock Alert
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>The following products are running low:</p>
+                <ul className="list-disc list-inside mt-1">
+                  {lowStockProducts.slice(0, 3).map((product) => (
+                    <li key={product.id}>
+                      {product.name} (SKU: {product.sku}) - {product.stock_count} remaining
+                    </li>
+                  ))}
+                  {lowStockProducts.length > 3 && (
+                    <li>... and {lowStockProducts.length - 3} more</li>
+                  )}
+                </ul>
+              </div>
+              <div className="mt-4">
+                <Link
+                  to="/products"
+                  className="text-sm font-medium text-red-800 hover:text-red-600"
+                >
+                  View all products →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            Quick Actions
+          </h3>
+          <div className="mt-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Link
+                to="/products/add"
+                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                <div>
+                  <span className="rounded-lg inline-flex p-3 bg-indigo-50 text-indigo-600">
+                    ➕
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900">Add Product</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Add a new product to your inventory
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                to="/scan"
+                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                <div>
+                  <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-600">
+                    📱
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900">QR Scanner</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Scan QR codes to update stock
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                to="/products"
+                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                <div>
+                  <span className="rounded-lg inline-flex p-3 bg-blue-50 text-blue-600">
+                    📦
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900">View Products</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Browse all your products
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                to="/transactions"
+                className="relative bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              >
+                <div>
+                  <span className="rounded-lg inline-flex p-3 bg-purple-50 text-purple-600">
+                    📋
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900">Transaction History</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    View stock movement history
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
