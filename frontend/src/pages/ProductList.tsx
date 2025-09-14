@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiClient } from '../lib/api';
 import { Product } from '../types';
+import { getSupabaseImageUrl } from '../utils/supabase';
 
 const ProductList: React.FC = () => {
   const { getAccessToken } = useAuth();
@@ -104,6 +105,19 @@ const ProductList: React.FC = () => {
         <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProducts.map((product) => (
             <div key={product.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
+              {/* Product Image */}
+              <div className="aspect-square bg-gray-50 flex items-center justify-center">
+                <img
+                  src={getSupabaseImageUrl(product.image_url)}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/placeholder-image.jpeg';
+                  }}
+                />
+              </div>
+
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">

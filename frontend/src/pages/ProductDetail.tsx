@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiClient } from '../lib/api';
 import { Product, Transaction } from '../types';
+import { getSupabaseImageUrl } from '../utils/supabase';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -157,6 +158,21 @@ const ProductDetail: React.FC = () => {
         {/* Product Details */}
         <div className="bg-white shadow rounded-lg p-4 sm:p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Product Details</h2>
+
+          {/* Product Image */}
+          <div className="mb-6 flex justify-center">
+            <div className="w-48 h-48 bg-gray-50 rounded-lg overflow-hidden">
+              <img
+                src={getSupabaseImageUrl(product.image_url)}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-image.jpeg';
+                }}
+              />
+            </div>
+          </div>
 
           <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
             <div>

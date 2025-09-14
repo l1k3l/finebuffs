@@ -5,6 +5,7 @@ export interface Product {
   sku: string;
   stock_count: number;
   reorder_level: number;
+  image_url?: string;
   created_at: string;
   updated_at: string;
 }
