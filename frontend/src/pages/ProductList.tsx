@@ -106,7 +106,7 @@ const ProductList: React.FC = () => {
           {filteredProducts.map((product) => (
             <div key={product.id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow">
               {/* Product Image */}
-              <div className="aspect-square bg-gray-50 flex items-center justify-center">
+              <Link to={`/product/${product.id}`} className="block aspect-square bg-gray-50 flex items-center justify-center cursor-pointer">
                 <img
                   src={getSupabaseImageUrl(product.image_url)}
                   alt={product.name}
@@ -116,7 +116,7 @@ const ProductList: React.FC = () => {
                     target.src = '/placeholder-image.jpeg';
                   }}
                 />
-              </div>
+              </Link>
 
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
