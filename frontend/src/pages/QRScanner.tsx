@@ -21,6 +21,17 @@ const QRScanner: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 500));
         await startScanner();
         setAutoStarted(true);
+
+        // Auto-scroll to show the full scanner view
+        setTimeout(() => {
+          const scannerElement = document.getElementById('qr-reader');
+          if (scannerElement) {
+            scannerElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+          }
+        }, 100); // Wait for scanner to initialize
       };
       autoStart();
     }
