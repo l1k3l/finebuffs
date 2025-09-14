@@ -67,7 +67,6 @@ npm start
 **Backend (.env):**
 ```
 SUPABASE_URL=your_supabase_project_url
-SUPABASE_SERVICE_KEY=your_service_role_key
 SUPABASE_ANON_KEY=your_anon_key
 ALLOWED_ORIGINS=http://localhost:3000
 FRONTEND_URL=http://localhost:3000
@@ -120,7 +119,7 @@ This application is configured for deployment on Render using the included `rend
 
 ### Production Environment Variables
 Set these in your Render dashboard:
-- `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ANON_KEY`
+- `SUPABASE_URL`, `SUPABASE_ANON_KEY`
 - `ALLOWED_ORIGINS` (your frontend domain)
 - `REACT_APP_*` variables for the frontend
 

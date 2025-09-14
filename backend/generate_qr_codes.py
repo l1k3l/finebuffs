@@ -14,10 +14,10 @@ def setup_supabase():
     load_dotenv()
 
     url = os.getenv("SUPABASE_URL")
-    key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_ANON_KEY")
+    key = os.getenv("SUPABASE_ANON_KEY")
 
     if not url or not key:
-        raise ValueError("Please set SUPABASE_URL and SUPABASE_SERVICE_KEY in your .env file")
+        raise ValueError("Please set SUPABASE_URL and SUPABASE_ANON_KEY in your .env file")
 
     return create_client(url, key)
 
