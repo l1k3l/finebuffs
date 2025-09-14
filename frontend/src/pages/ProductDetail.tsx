@@ -60,7 +60,7 @@ const ProductDetail: React.FC = () => {
       setTimeout(() => {
         const element = document.getElementById('stock-update-form');
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }, 500); // Longer delay to ensure page is fully loaded
 
