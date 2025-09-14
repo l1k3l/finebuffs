@@ -27,6 +27,10 @@ const QRScanner: React.FC = () => {
   const startScanner = () => {
     setError('');
     setIsScanning(true);
+    setScanResult(''); // Clear any previous scan results
+
+    // Show requesting access message
+    setError('📱 Requesting camera access... Please allow camera permissions when prompted.');
 
     // Wait for DOM element to be available
     setTimeout(() => {
@@ -42,6 +46,13 @@ const QRScanner: React.FC = () => {
           fps: 10,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
+          // Automatically request rear camera
+          facingMode: "environment", // Prefer rear camera
+          // Advanced camera constraints for better camera selection
+          advanced: [
+            { facingMode: "environment" }, // Rear camera
+            { facingMode: { exact: "environment" } } // Force rear if available
+          ]
         };
 
         const scanner = new Html5QrcodeScanner(
@@ -63,9 +74,19 @@ const QRScanner: React.FC = () => {
           },
           (errorMessage: string) => {
             // Error callback - we can ignore these as they happen frequently during scanning
-            // console.log('Scan error:', errorMessage);
+            // Only show permission-related errors
+            if (errorMessage.includes('Permission') || errorMessage.includes('NotAllowed')) {
+              setError('❌ Camera permission denied. Please allow camera access and try again.');
+            }
           }
         );
+
+        // Clear the "requesting access" message once scanner loads
+        setTimeout(() => {
+          if (scannerRef.current) {
+            setError(''); // Clear any temporary messages
+          }
+        }, 2000);
 
         scannerRef.current = scanner;
       } catch (err: any) {
