@@ -9,6 +9,7 @@ import ProductDetail from './pages/ProductDetail';
 import AddProduct from './pages/AddProduct';
 import TransactionHistory from './pages/TransactionHistory';
 import QRScanner from './pages/QRScanner';
+import PerformanceMonitor from './pages/PerformanceMonitor';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/transactions" element={<TransactionHistory />} />
               <Route path="/scan" element={<QRScanner />} />
+              <Route path="/performance" element={<PerformanceMonitor />} />
             </Routes>
           </Layout>
         </ProtectedRoute>

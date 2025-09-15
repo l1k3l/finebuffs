@@ -16,6 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { name: 'Add Product', path: '/products/add', icon: '➕' },
     { name: 'Transactions', path: '/transactions', icon: '📋' },
     { name: 'QR Scanner', path: '/scan', icon: '📱' },
+    ...(process.env.NODE_ENV === 'development' ? [{ name: 'Performance', path: '/performance', icon: '⚡' }] : []),
   ];
 
   return (

@@ -1,69 +1,102 @@
 import { supabase } from '../lib/supabase';
 import { Product, Transaction } from '../types';
+import { performanceService } from './performanceService';
 
 export class SupabaseService {
   // Direct product queries
   static async getProducts(): Promise<Product[]> {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('name');
+    return performanceService.timeAsyncOperation(
+      'fetch-products',
+      'direct-supabase',
+      async () => {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('name');
 
-    if (error) {
-      throw new Error(`Failed to fetch products: ${error.message}`);
-    }
+        if (error) {
+          throw new Error(`Failed to fetch products: ${error.message}`);
+        }
 
-    return data || [];
+        return data || [];
+      },
+      true, // bust cache
+      { table: 'products', operation: 'select-all' }
+    ).then(result => result.result);
   }
 
   static async getProduct(id: string): Promise<Product> {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single();
+    return performanceService.timeAsyncOperation(
+      'fetch-product-detail',
+      'direct-supabase',
+      async () => {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        throw new Error('Product not found');
-      }
-      throw new Error(`Failed to fetch product: ${error.message}`);
-    }
+        if (error) {
+          if (error.code === 'PGRST116') {
+            throw new Error('Product not found');
+          }
+          throw new Error(`Failed to fetch product: ${error.message}`);
+        }
 
-    return data;
+        return data;
+      },
+      true,
+      { table: 'products', operation: 'select-single', productId: id }
+    ).then(result => result.result);
   }
 
   // Direct transaction queries
   static async getTransactions(limit: number = 50, productId?: string): Promise<Transaction[]> {
-    let query = supabase
-      .from('transaction_history')
-      .select('*')
-      .limit(limit);
+    return performanceService.timeAsyncOperation(
+      productId ? 'fetch-product-transactions' : 'fetch-all-transactions',
+      'direct-supabase',
+      async () => {
+        let query = supabase
+          .from('transaction_history')
+          .select('*')
+          .limit(limit);
 
-    if (productId) {
-      query = query.eq('product_id', productId);
-    }
+        if (productId) {
+          query = query.eq('product_id', productId);
+        }
 
-    const { data, error } = await query;
+        const { data, error } = await query;
 
-    if (error) {
-      throw new Error(`Failed to fetch transactions: ${error.message}`);
-    }
+        if (error) {
+          throw new Error(`Failed to fetch transactions: ${error.message}`);
+        }
 
-    return data || [];
+        return data || [];
+      },
+      true,
+      { table: 'transaction_history', limit, productId }
+    ).then(result => result.result);
   }
 
   // Direct low stock products query
   static async getLowStockProducts(): Promise<Product[]> {
-    const { data, error } = await supabase
-      .from('low_stock_products')
-      .select('*');
+    return performanceService.timeAsyncOperation(
+      'fetch-low-stock-products',
+      'direct-supabase',
+      async () => {
+        const { data, error } = await supabase
+          .from('low_stock_products')
+          .select('*');
 
-    if (error) {
-      throw new Error(`Failed to fetch low stock products: ${error.message}`);
-    }
+        if (error) {
+          throw new Error(`Failed to fetch low stock products: ${error.message}`);
+        }
 
-    return data || [];
+        return data || [];
+      },
+      true,
+      { table: 'low_stock_products', operation: 'select-all' }
+    ).then(result => result.result);
   }
 
   // Product search functionality
@@ -72,17 +105,25 @@ export class SupabaseService {
       return this.getProducts();
     }
 
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .or(`name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
-      .order('name');
+    return performanceService.timeAsyncOperation(
+      'search-products',
+      'direct-supabase',
+      async () => {
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .or(`name.ilike.%${searchTerm}%,sku.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
+          .order('name');
 
-    if (error) {
-      throw new Error(`Failed to search products: ${error.message}`);
-    }
+        if (error) {
+          throw new Error(`Failed to search products: ${error.message}`);
+        }
 
-    return data || [];
+        return data || [];
+      },
+      true,
+      { table: 'products', operation: 'search', searchTerm }
+    ).then(result => result.result);
   }
 
   // Real-time subscriptions for live updates

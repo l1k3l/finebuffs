@@ -1,5 +1,6 @@
 import { apiBaseUrl } from './supabase';
 import { Product, Transaction, StockUpdate } from '../types';
+import { performanceService } from '../services/performanceService';
 
 class ApiClient {
   private baseUrl: string;
@@ -12,35 +13,50 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    operationName?: string
   ): Promise<T> {
-    const token = await this.getAuthToken();
+    return performanceService.timeAsyncOperation(
+      operationName || `api-${endpoint.split('/')[1] || 'request'}`,
+      'backend-api',
+      async () => {
+        const token = await this.getAuthToken();
 
-    const config: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
+        // Add cache busting for GET requests
+        let url = `${this.baseUrl}${endpoint}`;
+        if (!options.method || options.method === 'GET') {
+          url = performanceService.addCacheBusting(url);
+        }
+
+        const config: RequestInit = {
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          ...options,
+        };
+
+        const response = await fetch(url, config);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+          throw new Error(errorData.detail || 'Request failed');
+        }
+
+        return response.json();
       },
-      ...options,
-    };
-
-    const response = await fetch(`${this.baseUrl}${endpoint}`, config);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(errorData.detail || 'Request failed');
-    }
-
-    return response.json();
+      true,
+      { endpoint, method: options.method || 'GET' }
+    ).then(result => result.result);
   }
 
   // Product API
   async getProducts(): Promise<{ products: Product[] }> {
-    return this.request('/products');
+    return this.request('/products', {}, 'fetch-products');
   }
 
   async getProduct(id: string): Promise<{ product: Product }> {
-    return this.request(`/products/${id}`);
+    return this.request(`/products/${id}`, {}, 'fetch-product-detail');
   }
 
   async createProduct(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<{ product: Product }> {
