@@ -14,6 +14,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [qrCode, setQrCode] = useState('');
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   // Stock update form
   const [stockChange, setStockChange] = useState('');
@@ -28,10 +29,13 @@ const ProductDetail: React.FC = () => {
     try {
       setError('');
 
-      // Fetch product details and transactions directly from Supabase
-      // Keep QR code generation through backend as it has business logic
-      const [productData, transactionsData, qrResponse] = await Promise.all([
-        SupabaseService.getProduct(id),
+      // Prioritize product data first for faster UI render
+      const productData = await SupabaseService.getProduct(id);
+      setProduct(productData);
+      setLoading(false); // Show UI as soon as product loads
+
+      // Load additional data in background
+      const [transactionsData, qrResponse] = await Promise.all([
         SupabaseService.getTransactions(20, id),
         createApiClient(getAccessToken).getProductQRCode(id).catch(err => {
           console.warn('QR Code generation failed:', err.message);
@@ -39,7 +43,6 @@ const ProductDetail: React.FC = () => {
         })
       ]);
 
-      setProduct(productData);
       setTransactions(transactionsData);
 
       if (qrResponse) {
@@ -48,7 +51,6 @@ const ProductDetail: React.FC = () => {
 
     } catch (err: any) {
       setError(err.message);
-    } finally {
       setLoading(false);
     }
   }, [id, getAccessToken]);
@@ -189,13 +191,23 @@ const ProductDetail: React.FC = () => {
           {/* Product Image */}
           <div className="mb-6 flex justify-center">
             <div className="w-48 h-48 bg-gray-50 rounded-lg overflow-hidden">
+              {!imageLoaded && (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-gray-400">📦</div>
+                </div>
+              )}
               <img
                 src={getSupabaseImageUrl(product.image_url)}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className={`w-full h-full object-cover transition-opacity duration-300 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                loading="lazy"
+                onLoad={() => setImageLoaded(true)}
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.src = '/placeholder-image.jpeg';
+                  setImageLoaded(true);
                 }}
               />
             </div>

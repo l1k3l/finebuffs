@@ -2,6 +2,22 @@ import { supabase } from '../lib/supabase';
 import { Product, Transaction } from '../types';
 
 export class SupabaseService {
+  private static warmedUp = false;
+
+  // Warm up the connection by making a simple query
+  static async warmUpConnection(): Promise<void> {
+    if (this.warmedUp) return;
+
+    try {
+      // Make a lightweight query to establish connection
+      await supabase.from('products').select('id').limit(1);
+      this.warmedUp = true;
+      console.log('Supabase connection warmed up');
+    } catch (error) {
+      console.warn('Failed to warm up Supabase connection:', error);
+    }
+  }
+
   // Direct product queries
   static async getProducts(): Promise<Product[]> {
     const { data, error } = await supabase

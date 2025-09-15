@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
+import { SupabaseService } from '../services/supabaseService';
 
 interface AuthContextType {
   user: User | null;
@@ -34,12 +35,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Warm up Supabase connection once user is authenticated
+      if (session?.user) {
+        SupabaseService.warmUpConnection();
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Warm up connection when user signs in
+      if (session?.user) {
+        SupabaseService.warmUpConnection();
+      }
     });
 
     return () => subscription.unsubscribe();

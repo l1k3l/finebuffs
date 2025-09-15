@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import ProductList from './pages/ProductList';
-import ProductDetail from './pages/ProductDetail';
-import AddProduct from './pages/AddProduct';
-import TransactionHistory from './pages/TransactionHistory';
-import QRScanner from './pages/QRScanner';
+
+// Lazy load components to reduce initial bundle size
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const ProductList = React.lazy(() => import('./pages/ProductList'));
+const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
+const AddProduct = React.lazy(() => import('./pages/AddProduct'));
+const TransactionHistory = React.lazy(() => import('./pages/TransactionHistory'));
+const QRScanner = React.lazy(() => import('./pages/QRScanner'));
+const PerformanceMonitor = React.lazy(() => import('./pages/PerformanceMonitor'));
 
 function App() {
   return (
@@ -16,14 +19,21 @@ function App() {
       <Router>
         <ProtectedRoute>
           <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/products" element={<ProductList />} />
-              <Route path="/products/add" element={<AddProduct />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/transactions" element={<TransactionHistory />} />
-              <Route path="/scan" element={<QRScanner />} />
-            </Routes>
+            <Suspense fallback={
+              <div className="flex justify-center items-center h-64">
+                <div className="text-lg text-gray-600">Loading...</div>
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/products" element={<ProductList />} />
+                <Route path="/products/add" element={<AddProduct />} />
+                <Route path="/product/:id" element={<ProductDetail />} />
+                <Route path="/transactions" element={<TransactionHistory />} />
+                <Route path="/scan" element={<QRScanner />} />
+                <Route path="/performance" element={<PerformanceMonitor />} />
+              </Routes>
+            </Suspense>
           </Layout>
         </ProtectedRoute>
       </Router>
