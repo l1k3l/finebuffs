@@ -1,38 +1,65 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { createApiClient } from '../lib/api';
+import { SupabaseService } from '../services/supabaseService';
 import { Product } from '../types';
 import { getSupabaseImageUrl } from '../utils/supabase';
 
 const ProductList: React.FC = () => {
-  const { getAccessToken } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (search?: string) => {
     try {
-      const api = createApiClient(getAccessToken);
-      const response = await api.getProducts();
-      setProducts(response.products);
+      setError('');
+      if (search !== undefined) {
+        setSearchLoading(true);
+      }
+
+      const productsData = search
+        ? await SupabaseService.searchProducts(search)
+        : await SupabaseService.getProducts();
+
+      setProducts(productsData);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
+      setSearchLoading(false);
     }
-  }, [getAccessToken]);
+  }, []);
 
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchTerm) {
+        fetchProducts(searchTerm);
+      } else {
+        fetchProducts();
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, fetchProducts]);
+
+  // Initial load
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Real-time updates
+  useEffect(() => {
+    const unsubscribe = SupabaseService.subscribeToProducts((updatedProducts) => {
+      setProducts(updatedProducts);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Use products directly since search is now handled server-side
+  const filteredProducts = products;
 
   if (loading) {
     return (
@@ -70,13 +97,20 @@ const ProductList: React.FC = () => {
 
       {/* Search */}
       <div className="max-w-md">
-        <input
-          type="text"
-          placeholder="Search products..."
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search products..."
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchLoading && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-brand-600"></div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Products Grid */}

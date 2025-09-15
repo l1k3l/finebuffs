@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { createApiClient } from '../lib/api';
+import { SupabaseService } from '../services/supabaseService';
 import { Product, Transaction } from '../types';
 
 const Dashboard: React.FC = () => {
-  const { getAccessToken } = useAuth();
   const [stats, setStats] = useState({
     totalProducts: 0,
     lowStockCount: 0,
@@ -18,18 +16,16 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const api = createApiClient(getAccessToken);
-
-        // Fetch all data in parallel
-        const [productsResponse, lowStockResponse, transactionsResponse] = await Promise.all([
-          api.getProducts(),
-          api.getLowStockProducts(),
-          api.getTransactions(10),
+        // Fetch all data in parallel using direct Supabase queries
+        const [productsData, lowStockProductsData, transactionsData] = await Promise.all([
+          SupabaseService.getProducts(),
+          SupabaseService.getLowStockProducts(),
+          SupabaseService.getTransactions(10),
         ]);
 
         // Calculate stats
-        const totalProducts = productsResponse.products.length;
-        const lowStockCount = lowStockResponse.low_stock_products.length;
+        const totalProducts = productsData.length;
+        const lowStockCount = lowStockProductsData.length;
 
         setStats({
           totalProducts,
@@ -37,8 +33,8 @@ const Dashboard: React.FC = () => {
           totalValue: 0, // You could calculate this based on product values
         });
 
-        setLowStockProducts(lowStockResponse.low_stock_products);
-        setRecentTransactions(transactionsResponse.transactions.slice(0, 5));
+        setLowStockProducts(lowStockProductsData);
+        setRecentTransactions(transactionsData.slice(0, 5));
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -48,7 +44,14 @@ const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, [getAccessToken]);
+
+    // Set up real-time updates
+    const unsubscribe = SupabaseService.subscribeToProducts(() => {
+      fetchDashboardData();
+    });
+
+    return unsubscribe;
+  }, []);
 
   if (loading) {
     return (

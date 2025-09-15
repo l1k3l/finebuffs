@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createApiClient } from '../lib/api';
+import { SupabaseService } from '../services/supabaseService';
 import { Product, Transaction } from '../types';
 import { getSupabaseImageUrl } from '../utils/supabase';
 
@@ -25,20 +26,25 @@ const ProductDetail: React.FC = () => {
     if (!id) return;
 
     try {
-      const api = createApiClient(getAccessToken);
+      setError('');
 
-      // Fetch product details and QR code in parallel
-      const [productResponse, qrResponse] = await Promise.all([
-        api.getProduct(id),
-        api.getProductQRCode(id),
+      // Fetch product details and transactions directly from Supabase
+      // Keep QR code generation through backend as it has business logic
+      const [productData, transactionsData, qrResponse] = await Promise.all([
+        SupabaseService.getProduct(id),
+        SupabaseService.getTransactions(20, id),
+        createApiClient(getAccessToken).getProductQRCode(id).catch(err => {
+          console.warn('QR Code generation failed:', err.message);
+          return null;
+        })
       ]);
 
-      setProduct(productResponse.product);
-      setQrCode(qrResponse.qr_code_image);
+      setProduct(productData);
+      setTransactions(transactionsData);
 
-      // Fetch recent transactions for this product
-      const transactionsResponse = await api.getTransactions(20, id);
-      setTransactions(transactionsResponse.transactions);
+      if (qrResponse) {
+        setQrCode(qrResponse.qr_code_image);
+      }
 
     } catch (err: any) {
       setError(err.message);
@@ -52,6 +58,27 @@ const ProductDetail: React.FC = () => {
       fetchProductData();
     }
   }, [id, fetchProductData]);
+
+  // Real-time updates for product changes
+  useEffect(() => {
+    if (!id) return;
+
+    const unsubscribeProduct = SupabaseService.subscribeToProducts((updatedProducts) => {
+      const updatedProduct = updatedProducts.find(p => p.id === id);
+      if (updatedProduct) {
+        setProduct(updatedProduct);
+      }
+    });
+
+    const unsubscribeTransactions = SupabaseService.subscribeToProductTransactions(id, (updatedTransactions) => {
+      setTransactions(updatedTransactions);
+    });
+
+    return () => {
+      unsubscribeProduct();
+      unsubscribeTransactions();
+    };
+  }, [id]);
 
   useEffect(() => {
     // Auto-scroll to stock update form if hash is present

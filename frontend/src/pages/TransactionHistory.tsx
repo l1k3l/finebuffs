@@ -1,28 +1,32 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { createApiClient } from '../lib/api';
+import { SupabaseService } from '../services/supabaseService';
 import { Transaction } from '../types';
 
 const TransactionHistory: React.FC = () => {
-  const { getAccessToken } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const fetchTransactions = useCallback(async () => {
     try {
-      const api = createApiClient(getAccessToken);
-      const response = await api.getTransactions(100); // Get more transactions for history
-      setTransactions(response.transactions);
+      const transactionsData = await SupabaseService.getTransactions(100); // Get more transactions for history
+      setTransactions(transactionsData);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken]);
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
+
+    // Set up precise real-time updates for new transactions only
+    const unsubscribe = SupabaseService.subscribeToAllTransactions((updatedTransactions) => {
+      setTransactions(updatedTransactions);
+    });
+
+    return unsubscribe;
   }, [fetchTransactions]);
 
   if (loading) {
