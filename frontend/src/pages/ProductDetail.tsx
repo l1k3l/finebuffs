@@ -14,6 +14,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [qrCode, setQrCode] = useState('');
+  const [qrCodeLoading, setQrCodeLoading] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Stock update form
@@ -34,6 +35,9 @@ const ProductDetail: React.FC = () => {
       setProduct(productData);
       setLoading(false); // Show UI as soon as product loads
 
+      // Start QR code loading indicator
+      setQrCodeLoading(true);
+
       // Load additional data in background
       const [transactionsData, qrResponse] = await Promise.all([
         SupabaseService.getTransactions(20, id),
@@ -44,6 +48,7 @@ const ProductDetail: React.FC = () => {
       ]);
 
       setTransactions(transactionsData);
+      setQrCodeLoading(false);
 
       if (qrResponse) {
         setQrCode(qrResponse.qr_code_image);
@@ -377,29 +382,40 @@ const ProductDetail: React.FC = () => {
         </div>
 
         {/* QR Code - Mobile Optimized */}
-        {qrCode && (
+        {(qrCode || qrCodeLoading) && (
           <div className="bg-white shadow rounded-lg p-4 sm:p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">QR Code</h3>
             <div className="text-center">
-              <img
-                src={qrCode}
-                alt="Product QR Code"
-                className="mx-auto w-40 h-40 sm:w-48 sm:h-48 border border-gray-200 rounded"
-              />
+              {qrCodeLoading && !qrCode ? (
+                <div className="mx-auto w-40 h-40 sm:w-48 sm:h-48 border border-gray-200 rounded bg-gray-50 flex items-center justify-center">
+                  <div className="animate-spin text-3xl">⏳</div>
+                </div>
+              ) : (
+                <img
+                  src={qrCode}
+                  alt="Product QR Code"
+                  className="mx-auto w-40 h-40 sm:w-48 sm:h-48 border border-gray-200 rounded"
+                />
+              )}
               <p className="mt-2 text-sm text-gray-500">
-                Scan this code to quickly access this product
+                {qrCodeLoading && !qrCode
+                  ? "Generating QR code..."
+                  : "Scan this code to quickly access this product"
+                }
               </p>
-              <button
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = qrCode;
-                  link.download = `${product.sku}-qr-code.png`;
-                  link.click();
-                }}
-                className="mt-2 text-sm text-brand-600 hover:text-brand-500"
-              >
-                Download QR Code
-              </button>
+              {qrCode && (
+                <button
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = qrCode;
+                    link.download = `${product.sku}-qr-code.png`;
+                    link.click();
+                  }}
+                  className="mt-2 text-sm text-brand-600 hover:text-brand-500"
+                >
+                  Download QR Code
+                </button>
+              )}
             </div>
           </div>
         )}
