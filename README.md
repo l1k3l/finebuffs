@@ -117,6 +117,17 @@ This application is configured for deployment on Render using the included `rend
 - **Frontend**: Render Static Site (Node.js build)
 - **Database**: Supabase (PostgreSQL with real-time features)
 
+### Frontend Rewrite Rule
+For React Router to work properly on Render, add this rewrite rule in your frontend service settings:
+
+```
+Source: /*
+Destination: /index.html
+Action: Rewrite
+```
+
+See the [Render documentation](https://render.com/docs/deploy-create-react-app#using-client-side-routing) for more details on client-side routing configuration.
+
 ### Production Environment Variables
 Set these in your Render dashboard:
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
