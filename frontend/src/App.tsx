@@ -11,7 +11,6 @@ const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
 const AddProduct = React.lazy(() => import('./pages/AddProduct'));
 const TransactionHistory = React.lazy(() => import('./pages/TransactionHistory'));
 const QRScanner = React.lazy(() => import('./pages/QRScanner'));
-const PerformanceMonitor = React.lazy(() => import('./pages/PerformanceMonitor'));
 
 function App() {
   return (
@@ -31,7 +30,6 @@ function App() {
                 <Route path="/product/:id" element={<ProductDetail />} />
                 <Route path="/transactions" element={<TransactionHistory />} />
                 <Route path="/scan" element={<QRScanner />} />
-                <Route path="/performance" element={<PerformanceMonitor />} />
               </Routes>
             </Suspense>
           </Layout>
